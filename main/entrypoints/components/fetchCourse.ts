@@ -61,28 +61,50 @@ export function useFetchCourses() {
     // 2. 獲取主課程 (接收 deptList):獲取大學和研究所所有科系的課程資料並加入到courses陣列後回傳
     async function fetchMainCourses(deptList: any[]) {
         setProgress(`正在獲取主課程 (共 ${deptList.length} 個科系)...`);
+        //拿一個空陣列來存課程資料
         let courses: any[] = [];
         
-        for (let i = 0; i < deptList.length; i++) {
-            const dept = deptList[i];
-            // 更新進度顯示 (每 5 個顯示一次避免一直渲染)
-            //如果i除5的餘數是零(整除)就更新進度文字
-            if(i % 5 === 0) setProgress(`正在獲取主課程: ${i}/${deptList.length} - ${dept.name}`);
+        // 設定平行處理數量
+        const BATCH_SIZE = 6; // 一次同時發送 6 個請求(用promise.all時瀏覽器的上限,再多也是擠這6個通道)
+        
+        // 將 deptList 切成很多小批次
+        for (let i = 0; i < deptList.length; i += BATCH_SIZE) {
+            //這一批要跑的科系,從i開始到i+BATCH_SIZE結束
+            const batchDepts = deptList.slice(i, i + BATCH_SIZE);
             
-            await new Promise(r => setTimeout(r, 100)); // 延遲
+            // 更新進度顯示
+            setProgress(`正在獲取主課程: ${i}/${deptList.length} (分批加速中...)`);
 
-            try {
-                const response = await postData("https://academics.nutn.edu.tw/Course/api/Query/GetCourse", {
-                    "acs": ACS, "ki": dept.ki, "dc": dept.dc,
-                    "kw": "", "gr": "", "ch": "", "ot": "", "ge": "", "ta": "", "we": "", "ll": ""
-                });
-                if (response && response.length > 0) {
-                    courses = courses.concat(response);
+            const batchPromises = batchDepts.map(async (dept) => {
+                try {
+                    const response = await postData("https://academics.nutn.edu.tw/Course/api/Query/GetCourse", {
+                        "acs": ACS, "ki": dept.ki, "dc": dept.dc,
+                        "kw": "", "gr": "", "ch": "", "ot": "", "ge": "", "ta": "", "we": "", "ll": ""
+                    });
+                    
+                    if (response && response.length > 0) {
+                        return response; // 回傳找到的課程陣列
+                    }
+                    return []; // 沒找到就回傳空陣列
+                } catch (e) {
+                    console.error(`查詢失敗: ${dept.name}`, e);
+                    return [];
                 }
-            } catch (e) {
-                console.error(`查詢失敗: ${dept.name}`, e);
-            }
+            });
+
+            // 用promise.all來執行,他會讓這一批全部跑完,才繼續往下
+            //跟一般promise的不同是他可以一次處理多個promise然後等全部完成(普通promise只能處理一個)
+            const batchResults = await Promise.all(batchPromises);
+            
+            // 將結果合併回 courses
+            batchResults.forEach(result => {
+                courses = courses.concat(result);
+            });
+
+            // 每批次中間稍作休息，給伺服器喘氣空間 (例如 50ms)
+            await new Promise(r => setTimeout(r, 50)); 
         }
+        
         return courses;
     }
 
@@ -90,33 +112,51 @@ export function useFetchCourses() {
     async function fetchGeneralEdCourses() {
         setProgress("正在獲取通識課程...");
         const geCodes = ["A","AA","AB","AC","AD","AE","AF","AG"];
+        //拿一個空陣列來存課程資料
         let courses: any[] = [];
-        for (let code of geCodes) {
+
+        // 全部一起發送請求
+        const promises = geCodes.map(async (code) => {
             try {
                 const response = await postData("https://academics.nutn.edu.tw/Course/api/Query/GetCourse", {
                     "acs": ACS, "ki": "4", "ge": code,
                     "dc": "", "kw": "", "gr": "", "ch": "", "ot": "", "ta": "", "we": "", "ll": ""
                 });
-                if (response && response.length > 0) courses = courses.concat(response);
-            } catch (e) {}
-        }
+                return response || [];
+            } catch (e) {
+                return [];
+            }
+        });
+
+        //用 Promise.all 執行請求並等待所有請求完成
+        const results = await Promise.all(promises);
+        //把所有結果合併到 courses 陣列中
+        results.forEach(response => courses = courses.concat(response));
         return courses;
     }
+
 
     // 4. 師培:獲取所有師培課程並加入到courses陣列後回傳
     async function fetchTeacherEdCourses() {
         setProgress("正在獲取師培課程...");
         const taCodes = ["ZZS101","ZZS102","ZZS201","ZZS202","ZZS203","ZZU051","ZZU075"];  
         let courses: any[] = [];
-        for (let code of taCodes) {
+
+        // 全部一起發送請求
+        const promises = taCodes.map(async (code) => {
             try {
                 const response = await postData("https://academics.nutn.edu.tw/Course/api/Query/GetCourse", {
                     "acs": ACS, "ki": "5", "ta": code,
                     "dc": "", "kw": "", "gr": "", "ch": "", "ot": "", "ge": "", "we": "", "ll": ""
                 });
-                if (response && response.length > 0) courses = courses.concat(response);
-            } catch (e) {}
-        }
+                return response || [];
+            } catch (e) {
+                return [];
+            }
+        });
+
+        const results = await Promise.all(promises);
+        results.forEach(response => courses = courses.concat(response));
         return courses;
     }
 
@@ -125,15 +165,20 @@ export function useFetchCourses() {
         setProgress("正在獲取其他課程...");
         const otCodes = ["EMI_S","EMI_M","DIS_0","DIS_1","DIS_2"]; 
         let courses: any[] = [];
-        for (let code of otCodes) {
+        // 全部一起發送請求
+        const promises = otCodes.map(async (code) => {
             try {
                 const response = await postData("https://academics.nutn.edu.tw/Course/api/Query/GetCourse", {
                     "acs": ACS, "ki": "6", "ot": code,
                     "dc": "", "kw": "", "gr": "", "ch": "", "ge": "", "ta": "", "we": "", "ll": ""
                 });
-                if (response && response.length > 0) courses = courses.concat(response);
-            } catch (e) {}
-        }
+                return response || [];
+            } catch (e) {
+                return [];
+            }
+        });
+        const results = await Promise.all(promises);
+        results.forEach(response => courses = courses.concat(response));
         return courses;
     }
 
