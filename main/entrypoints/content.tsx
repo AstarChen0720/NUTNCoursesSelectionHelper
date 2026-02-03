@@ -319,7 +319,7 @@ function PeriodQueryPanel() {
     let sourceData = allData;
     if (sourceData.length === 0) {
 
-      let sourceData = await runCrawler();
+      sourceData = await runCrawler();
       // ★★★ 如果回傳回來還是空的(可能出錯或沒抓到)，就中止
       if (!sourceData || sourceData.length === 0) {
         console.log("抓取後無資料，停止篩選");
