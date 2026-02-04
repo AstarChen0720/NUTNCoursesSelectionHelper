@@ -1,0 +1,806 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <title>課程資訊與選課系統</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="copyright" content="National University of Tainan" />
+    <meta name="keywords" content="課程查詢,選課,課程綱要,Syllabus,NUTN,Course" />
+    <link href="/Course/Content/bootstrap.min.css?v=638949996518243791" rel="stylesheet" />
+    <link href="/Course/Content/bootstrap-icons.min.css?v=638760666186872324" rel="stylesheet" />
+    <link href="/Course/Content/site.css?v=639027881612920025" rel="stylesheet" />
+    <script src="/Course/Scripts/bootstrap.bundle.min.js?v=638905044974927349"></script>
+    
+    <style>
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+        }
+
+        .transition {
+            transition: all 0.3s;
+        }
+
+        .rotate-90 {
+            transform: rotate(90deg);
+        }
+
+        .card-container.expanded {
+            background-color: #f0f8ff;
+        }
+
+        .highlight-keyword {
+            background-color: #E8F0FE !important;
+        }
+
+        .nav-pills .nav-link {
+            border-radius: 0;
+            margin: 0;
+            border: 1px solid #dee2e6;
+            color: #495057;
+            background-color: #f8f9fa;
+        }
+
+            .nav-pills .nav-link.active {
+                background-color: #0d6efd;
+                color: #fff;
+            }
+    </style>    
+    <style>
+        .btn-367f9a {
+            background-color: #367F9A;
+            border-color: #367F9A;
+            color: #fff;
+            font-weight: bold;
+        }
+
+         .btn-outline-367f9a {
+             background-color: transparent;
+             border-color: #367F9A;
+             color: #367F9A;
+             font-weight: bold;
+         }
+
+        .btn-367f9a:hover,
+        .btn-367f9a:focus {
+            background-color: #2b657a;
+            border-color: #2b657a;
+            color: #fff;
+            font-weight: bold;
+        }              
+        .btn.btn-outline-367f9a:hover,
+        .btn.btn-outline-367f9a:focus {
+            background-color: #367F9A;
+            border-color: #367F9A;
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        .btn-check:checked + .btn-outline-367f9a {
+            background-color: #367F9A;
+            border-color: #367F9A;
+            color: #fff;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da; /* 預設 */
+        }
+            .alert-danger.custom-light {
+                background-color: #fbecec; /* 更淡的粉紅 */
+                color: #a94442; /* 深紅字 */
+                border-color: #f5c6cb;
+            }   
+    .cbl-weekly label {
+        margin-right: 8px;   /* checkbox 之間間距 */
+        white-space: nowrap; /* 避免「checkbox 與文字」分開換行 */
+        }
+    </style>
+
+</head>
+<body>
+    
+    <div class="modal fade" id="alertModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header p-3 bg-light">
+                    <h6 class="modal-title text-left fw-bolder" id="alertHead"></h6>
+                    <button type="button" class="btn-close me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <input type="hidden" id="hv_rw" />
+                </div>
+                <div class="modal-body p-2">
+                    <div class="row fw-bolder p-1 d-flex align-items-center">
+                        <div id="alertIcon" class="col-auto text-center fs-4 me-0 ms-2 "></div>
+                        <div class="col ps-0 ms-0">
+                            <div id="alertContent" class="d-inline-block"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer p-1">
+                    <button type="button" class="btn btn-outline-danger waves-effect" data-bs-dismiss="modal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="overlay">
+        <div id="loadingBox">
+            <div class="spinner-border text-primary" role="status"></div>
+            <div class="mt-2" id="loadingText">查詢中...</div>
+        </div>
+    </div>
+    
+    <form method="post" action="./cos" id="aspnetForm">
+<div class="aspNetHidden">
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="lS7nG6HgZXqELrJt08wdztml6/U2frp8G6Sz2P7xyVer2vc6JaZQqAUMoKrXQEFbj5E52m5jvy73fFKALvSQrZHXEg/YtU+fOwCaAh8CpEE=" />
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['aspnetForm'];
+if (!theForm) {
+    theForm = document.aspnetForm;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="25A79D8D" />
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="9GHbKbnnAW1xxR7XJcUssLmdy4gVqvrKYQGHNW4/RauiKDZmzU3ljwgCawqb4/Ux6JRtxvCexr+I78qg5Pdigm57jRlaWFH1P5ZVM18sK45nnEE/1UXeKnBzndyCYCGPMiU7j2C9J8rltaTIiC4nOg==" />
+</div>             
+        <noscript>
+            您的瀏覽器不支援JavaScript功能，若網頁功能無法正常使用時，請開啟瀏覽器JavaScript狀態
+        </noscript>
+        <input type="hidden" name="ctl00$hv_token" id="ctl00_hv_token" value="0abb4a3a721a4d038eacebdf8f9b69bd" /> 
+        
+        <header id="fixedHeader" class="sticky-top"> 
+            
+            <div id="sys_banner"
+                class="d-none d-lg-flex container position-relative align-items-center"
+                style="height: 80px;">
+                
+                <div class="position-absolute top-50 start-50 translate-middle">
+                    <img src="/Course/images/logo_new.png"
+                        alt="NUTN Logo"
+                        style="max-height: 80px;" />
+                </div>
+                
+                <div class="ms-auto d-flex align-items-center topLinkBox" style="font-size: 16px; color: #333;">
+                    <a accesskey="U" href="#U" id="U" title="上方輔助連結區(alt+U)" class="u">:::</a>
+                    <a href="#" onclick="changeLanguage('en')" title="切成英文"><i class="bi bi-translate"></i> English</a>
+                    <a href="#" onclick="changeLanguage('zh-TW')" title="切回中文"><i class="bi bi-translate"></i> 中文</a>
+                    <a href="https://www.nutn.edu.tw/" target="_blank" title="南大首頁(另開新視窗)" data-i18n-title="AZ30"><i class="bi bi-bank" aria-hidden="true"></i> <span class="i18n-text" data-i18n="AZ30">南大首頁</span></a>                   
+                </div>
+            </div>
+            
+            <nav class="navbar navbar-custom navbar-expand-md navbar-dark p-1 m-0 mb-3 fw-bold">
+                <a class="navbar-brand fw-bolder d-lg-none" href="#">
+                    <img src="/Course/images/nutn_logo.png" alt="nutn_log" style="vertical-align: middle; border-radius: 3px; width: 23px; height: 28px; margin: -4px 3px 0 3px;" />
+                    <span>課程資訊及選課系統</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAll" aria-controls="navbarAll" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="container">
+                    <div class="collapse navbar-collapse" id="navbarAll">
+                        
+                        <ul class="navbar-nav" id="navmenu">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownMenuLink1" data-bs-toggle="dropdown" aria-expanded="false" title="相關連結" data-i18n-title="AA10" ><i class="bi bi-link-45deg"></i> <span class="i18n-text" data-i18n="AA10">相關連結</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-lg-start ps-1 ms-2 mt-2" aria-labelledby="navbarDropdownMenuLink1" data-bs-auto-close="outside">                       
+                                    <li><a class="dropdown-item" href="https://academic.nutn.edu.tw/index.php?option=module&lang=cht&task=showlist&id=395&index=3" target="_blank" title="選課、課務專區" data-i18n-title="AA20" data-i18n="AA20">選課、課務專區(教務處)</a></li>
+                                    <li><a class="dropdown-item" href="https://system.nutn.edu.tw/UID/" target="_blank" title="更改/忘記密碼(UID)(另開新視窗)" data-i18n-title="AA12" data-i18n="AA12">更改/忘記密碼(UID)</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+                                    <li><a class="dropdown-item" href="https://student.nutn.edu.tw/freshInfo/" target="_blank" title="新生入學專區(另開新視窗)" data-i18n-title="AA13" data-i18n="AA13">新生入學專區</a></li>
+                                    <li><a class="dropdown-item" href="https://ecourse.nutn.edu.tw/" target="_blank" title="課程大綱(Ecourse)(另開新視窗)" data-i18n-title="AA14" data-i18n="AA14">課程大綱(Ecourse)</a></li>
+                                    <li><a class="dropdown-item" href="https://academics.nutn.edu.tw/iSTU/" target="_blank" title="學生系統(另開新視窗)" data-i18n-title="AA15" data-i18n="AA15">學生系統</a></li>
+                                    <li><a class="dropdown-item" href="https://student.nutn.edu.tw/iOSA/" target="_blank" title="學生事務線上辦公室(另開新視窗)" data-i18n-title="AA16" data-i18n="AA16">學務線上辦公室</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+                                    <li><a class="dropdown-item" href="https://academics.nutn.edu.tw/interSchElect/" target="_blank" title="校際選課系統(非本校學生用)(另開新視窗)" data-i18n-title="AA17" data-i18n="AA17">校際選課系統(非本校學生用)</a></li>
+                                    <li><a class="dropdown-item" href="https://campus.nutn.edu.tw/SSO/entrance/Logon2.aspx" target="_blank" title="南大入口網(另開新視窗)" data-i18n-title="AA18" data-i18n="AA18">南大入口網</a></li>
+                                    <li><a class="dropdown-item" href="https://www.nutn.edu.tw/index-ch.html" target="_blank" title="臺南大學網頁(另開新視窗)" data-i18n-title="AA19" data-i18n="AA19">臺南大學網頁</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownMenuLink2" data-bs-toggle="dropdown" aria-expanded="false" title="公告與說明" data-i18n-title="AB10"><i class="bi bi-stickies-fill"></i> <span class="i18n-text" data-i18n="AB10">公告與說明</span></a>
+                                <ul class="dropdown-menu dropdown-menu-lg-start ps-1 ms-2 mt-2" aria-labelledby="navbarDropdownMenuLink2" data-bs-auto-close="outside">
+                                    <li><a class="dropdown-item" href="/Course/guide/post" title="課程相關公告" data-i18n-title="AB11" data-i18n="AB11">課程相關公告</a></li>
+                                    <li><a class="dropdown-item" href="/Course/guide/acpw" title="帳號密碼說明" data-i18n-title="AB12" data-i18n="AB12">帳號密碼說明</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownMenuLink3" data-bs-toggle="dropdown" aria-expanded="false" title="課程查詢" data-i18n-title="AC10" ><i class="bi bi-search"></i> <span class="i18n-text" data-i18n="AC10">課程查詢</span></a>
+                                <ul class="dropdown-menu dropdown-menu-lg-start ps-1 ms-2 mt-2" aria-labelledby="navbarDropdownMenuLink3" data-bs-auto-close="outside">
+                                    <li><a class="dropdown-item" href="/Course/Qry/cos" title="課程查詢" data-i18n-title="AC11" data-i18n="AC11">開課查詢</a></li>
+                                    <li><a class="dropdown-item" href="/Course/Qry/ynSel" title="選課檢測" data-i18n-title="AC12" data-i18n="AC12">選課檢測</a></li>
+                                    
+                                </ul>
+                            </li>
+                            
+                        </ul>
+                        <ul class="navbar-nav ms-auto flex-column flex-md-row mt-3 mt-md-0  d-lg-none ">
+                            
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="#" onclick="changeLanguage('en')" title="切換成英文" ><i class="bi bi-translate"></i> English</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="#" onclick="changeLanguage('zh-TW')"><i class="bi bi-translate"></i> 中文</a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="https://www.nutn.edu.tw/" target="_blank" title="南大首頁" data-i18n-title="AZ30">
+                                    <i class="bi bi-bank"></i> <span class="i18n-text" data-i18n="AZ30">南大首頁</span>
+                                </a>
+                            </li>
+                        </ul>
+                        
+                        <ul class="navbar-nav ms-auto flex-column flex-md-row mt-3 mt-md-0">
+                            
+                            <li class="nav-item p-1 pe-3 ps-3 d-flex align-items-center me-md-1 mb-1 mb-md-0 border-1 rounded-3"
+                                style="color: #367F9A; background-color: #E0FFFF;" title="目前學年度學期"  data-i18n-title="AY01" >                            
+                               <span data-i18n="AY03">學期</span>：114-2
+                            </li>
+                            <li id="ctl00_lbl_user_info" class="nav-item p-1 pe-3 ps-3 d-flex align-items-center me-md-3 mb-1 mb-md-0 border-1 rounded-3" style="color: #367F9A; background-color: #E0FFFF;" title="登入者資訊" data-i18n-title="AY02">
+                                
+                                <i class="bi bi-person-fill"></i>
+                                
+                                <span style="margin-left: 3px;">   <span style="font-family: EUDC_ming;"></span></span>
+                            </li>
+                            
+                            <li class="nav-item mt-1 mt-md-0 ms-md-2">
+                                <a id="ctl00_btnLogin" title="登入選課系統" class="btn btn-outline-light btn-sm" data-i18n-title="BA31" href="javascript:__doPostBack(&#39;ctl00$btnLogin&#39;,&#39;&#39;)"><i class="bi bi-box-arrow-in-right"></i> <span class="i18n-text" data-i18n="AZ20">登入</span></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        
+        <main class="container">
+            
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8">
+            
+            <nav aria-label="breadcrumb m-0">
+                <ol class="breadcrumb my-breadcrumb fw-bold">
+                    <li class="breadcrumb-item"><a href="/Course/Default.aspx" style="font-size:16pt;line-height:1;"><i class="bi bi-house-gear-fill"></i></a></li>
+                    <li class="breadcrumb-item text-muted" data-i18n="AC10">課程查詢</li>
+                    <li class="breadcrumb-item" aria-current="page"><span style="font-size:14pt;line-height:1;" data-i18n="AC11">開課查詢</span></li>
+                    <li class="breadcrumb-item"><span style="font-size:14pt;line-height:1;" id="lbl_breadcrumb"></span></li>
+                </ol>
+            </nav>
+            
+            <div class="row justify-content-center mb-3 g-1">
+                <div class="col-12 col-md-3 mb-1">
+                    <div class="input-group ">
+                        <span class="input-group-text border-secondary" id="lblAcadeSession" data-i18n="AY03">學期</span>
+                        <select id="lstAcadeSession" class="form-select form-select border-secondary" title="選擇學期">
+                            
+                            <option value="1142">114-2</option>
+                            
+                            <option value="1141">114-1</option>
+                            
+                            <option value="1132">113-2</option>
+                            
+                            <option value="1131">113-1</option>
+                            
+                            <option value="1122">112-2</option>
+                            
+                            <option value="1121">112-1</option>
+                            
+                            <option value="1112">111-2</option>
+                            
+                            <option value="1111">111-1</option>
+                            
+                            <option value="1102">110-2</option>
+                            
+                            <option value="1101">110-1</option>
+                            
+                        </select>
+                    </div>
+                </div>
+                <div class="col-12 col-md-9 mb-1">
+                    <div class="input-group">
+                        <input type="text" id="txtKeyWord" name="txtKeyWord"
+                               class="form-control border-secondary"                              
+                               maxlength="30"
+                               placeholder="快速查詢，輸入關鍵字(如老師、課程名稱)"
+                               data-i18n-placeholder="BB10"
+                              >
+                        <button type="button" class="btn btn-secondary" onclick="getList('1');" title="快速查詢" data-i18n-title="BB17"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="btn-group d-flex flex-wrap mb-1" role="group" aria-label="選項群組">
+                <input type="radio" class="btn-check" name="options" id="opt1" value="opt1">
+                <label class="btn btn-outline-367f9a" for="opt1" data-i18n="ZZ93">大學部</label>
+
+                <input type="radio" class="btn-check" name="options" id="opt2" value="opt2">
+                <label class="btn btn-outline-367f9a" for="opt2" data-i18n="ZZ94">研究所</label>
+
+                <input type="radio" class="btn-check" name="options" id="opt3" value="opt3">
+                <label class="btn btn-outline-367f9a" for="opt3" data-i18n="ZZ95">通識</label>
+
+                <input type="radio" class="btn-check" name="options" id="opt4" value="opt4">
+                <label class="btn btn-outline-367f9a" for="opt4" data-i18n="ZZ96">師培</label>
+
+                <input type="radio" class="btn-check" name="options" id="opt5" value="opt5">
+                <label class="btn btn-outline-367f9a" for="opt5" data-i18n="ZZ97">其他</label>
+            </div>
+        </div>
+    </div>
+    
+    <div id="block-college-dep" class="row justify-content-center g-2 mb-1 d-none">
+        <div class="col-12 col-md-8">
+            <div class="row g-1">
+                <div class="col-12 col-sm-4">
+                    <div class="input-group ps-lg-1">
+                        <span class="input-group-text border-secondary" data-i18n="ZZ30">學院</span>
+                        <select id="lstCollege" class="form-select border-secondary"  title="選擇學院">                          
+                        </select>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-8">
+                    <div class="input-group pe-lg-1">
+                        <span class="input-group-text border-secondary" data-i18n="ZZ31">系所</span>
+                        <select id="lstDept" class="form-select border-secondary"  title="選擇系所">
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="block-grade-choice" class="row justify-content-center g-2 mb-1 d-none">
+        <div class="col-12 col-md-8">
+            <div class="input-group px-lg-1">
+                <span class="input-group-text border-secondary" data-i18n="ZZ32">年級</span>
+                <select id="lstGrade" class="form-select border-secondary"  title="選擇年級">
+                </select>
+                <span class="input-group-text border-secondary" data-i18n="ZZ33">修別</span>
+                <select id="lstChoice" class="form-select border-secondary"  title="選擇修別">
+                    <option value="" data-i18n="AZ36">不拘</option>
+                    <option value="0" data-i18n="ZZ17">必修</option>
+                    <option value="1" data-i18n="ZZ19">必選修</option>
+                    <option value="2" data-i18n="ZZ21">選修</option>                   
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div id="block-ge" class="row justify-content-center g-2 mb-1 d-none">
+        <div class="col-12 col-md-8">
+            <div class="input-group px-lg-1">
+                <span class="input-group-text border-secondary" data-i18n="ZZ34">領域</span>
+                <select id="lstGeArea" class="form-select border-secondary"  title="選擇通識領域">                
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div id="block-ta" class="row justify-content-center g-2 mb-1 d-none">
+        <div class="col-12 col-md-8">
+            <div class="input-group px-lg-1">
+                <span class="input-group-text border-secondary" data-i18n="ZZ35">開課班別</span>
+                <select id="lstTaClass" class="form-select border-secondary"  title="選擇師培班別">                   
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div id="block-other" class="row justify-content-center g-2 mb-1 d-none">
+        <div class="col-12 col-md-8">
+            <!-- 提示區塊 -->
+            <div class="alert alert-warning mt-1 mb-0 " style="font-size: 10pt;" data-i18n="BB37">
+                <strong class="text-danger">【強化英語力、提升競爭力】</strong>
+                <strong>請同學把握機會，踴躍修習全英語課程！！<br />
+                </strong>本校學生修習<strong>全英語課程</strong>達16學分以上，可授予「EMI修課證書」，或學位證書上註記 <strong>E1-E5</strong> 的認證等級，歡迎同學踴躍修課。                  
+            </div>
+            <!-- EMI 認證等級表格 -->
+            <div class="table-responsive mt-1" style="font-size: 9pt;">
+                <table class="table table-bordered text-center align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="col-2 col-md-3" data-i18n="BB38">認證等級(EMI Level)</th>
+                            <th class=" align-center align-self-auto " data-i18n="BB39">基準</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold">E1</td>
+                            <td class="text-start" data-i18n="BB40">修畢 EMI 課程達 <strong>16 學分（學士）</strong> 或占畢業學分比例達 <strong>12.5%以上 </strong></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">E2</td>
+                            <td class="text-start" data-i18n="BB41">修畢 EMI 課程達 <strong>32 學分（學士）</strong> 或占畢業學分比例達 <strong>25%以上 </strong></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">E3</td>
+                            <td class="text-start" data-i18n="BB42">修畢 EMI 課程達 <strong>64 學分（學士）</strong> 或占畢業學分比例達 <strong>50%以上 </strong></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">E4</td>
+                            <td class="text-start" data-i18n="BB43">修畢 EMI 課程達 <strong>98 學分（學士）</strong> 或占畢業學分比例達 <strong>75%以上 </strong></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">E5</td>
+                            <td class="text-start" data-i18n="BB44">修畢 EMI 課程達 <strong>128 學分（學士）</strong> 或占畢業學分比例達 <strong>100% </strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="input-group px-lg-1">
+                <span class="input-group-text border-secondary" data-i18n="ZZ36">類別</span>
+                <select id="lstOther" class="form-select border-secondary"  title="選擇類別">
+                    <option value="EMI_S" data-i18n="ZZ46">全英語(大學)</option>
+                    <option value="EMI_M" data-i18n="ZZ47">全英語(碩博)</option>
+                    <option value="DIS_0" data-i18n="ZZ48">本校遠距(限修2門)</option>
+                    <option value="DIS_1" data-i18n="ZZ49">校外遠距(Ewant)</option>
+                    <option value="DIS_2" data-i18n="ZZ50">校外遠距(人工智慧聯盟)</option>
+                    
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center mt-1">
+        <div class="col-12 col-md-8">
+            <div class="input-group">
+                <span class="input-group-text border-secondary" data-i18n="ZZ51">星期</span>
+                <div class="form-control border-secondary select-list d-flex flex-wrap gap-lg-4 cbl-weekly">
+                  <label><input type="checkbox" name="cblWeekly" value="1"><span data-i18n="ZZ37">一</span></label>
+                  <label><input type="checkbox" name="cblWeekly" value="2"><span data-i18n="ZZ38">二</span></label>
+                  <label><input type="checkbox" name="cblWeekly" value="3"><span data-i18n="ZZ39">三</span></label>
+                  <label><input type="checkbox" name="cblWeekly" value="4"><span data-i18n="ZZ40">四</span></label>
+                  <label><input type="checkbox" name="cblWeekly" value="5"><span data-i18n="ZZ41">五</span></label>
+                  <label><input type="checkbox" name="cblWeekly" value="6"><span data-i18n="ZZ42">六</span></label>
+                  <label><input type="checkbox" name="cblWeekly" value="7"><span data-i18n="ZZ43">日</span></label>
+                </div>
+                <button type="button" class="btn btn-outline-secondary" onclick="ClearWeekly();" title="清除星期選項" data-i18n-title="ZZ44" data-i18n="ZZ44">清除</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center mt-2">
+        <div class="col-12 col-md-8 d-flex justify-content-center">
+            <button type="button" class="btn btn-sm btn-custom w-100" onclick="getList();" id="btnQuery" title="查詢" data-i18n-title="ZZ45" data-i18n="ZZ45">查詢</button>
+        </div>
+    </div>
+
+    
+    <div class="row justify-content-center g-2 mt-2">
+        <div class="col-12 col-md-8" id="accordionGroup">
+            <div class="row justify-content-center g-2" style="max-width: 900px; margin: 0 auto;" id="cardContainer">
+                
+            </div>
+        </div>
+    </div>
+
+        </main>
+        
+        <footer class="col-12 page_footer">
+            <a id="B" href="#B" class="b" accesskey="B" title="下方版權宣告區(alt+B)">:::</a>
+            Copyright © 2023 National University of Tainan all rights reserved.
+        </footer>
+    </form>
+    <script>   
+        window.i18n = {}; 
+        let savedLang = localStorage.getItem("lang") || "zh-TW";   
+        let isProcessing = false;
+        document.addEventListener("DOMContentLoaded", async () => {           
+            window.apiUrl = '';             
+            window.apiUrl = '/Course/api/Query/GetI18n';              
+            await loadLanguage(window.apiUrl, savedLang);           
+            if (!window.i18n[savedLang] || Object.keys(window.i18n[savedLang]).length === 0) {
+                savedLang = "zh-TW"; // fallback               
+            }           
+            setLanguage(savedLang);   
+        });        
+    </script>    
+        
+    <script src='/Course/Scripts/lang2.js?v=639014765210684986'></script>
+    <script src='/Course/Scripts/com.js?v=639026155692600662'></script>    
+    <script src='/Course/Scripts/fetch.js?v=638989670847754412'></script> 
+    
+    <script>	      
+        let kind = "";   
+        document.addEventListener('DOMContentLoaded', function () {    
+            getCollege();                    
+            getGeArea();
+            getTaClass();
+            
+            document.getElementById("txtKeyWord").addEventListener("keydown", function (e) {
+                if (e.key === "Enter" || e.keyCode === 13) {
+                    e.preventDefault();
+                    getList('1');
+                }
+            });
+            
+            document.getElementById("lstCollege").addEventListener("change", function () {
+                const selDep = document.getElementById("lstDept");
+                selDep.innerHTML = "";
+                const collegeId = this.value;
+                if (collegeId) {
+                    getDept(collegeId);
+                }
+            });
+            
+            const radios = document.querySelectorAll('input[name="options"]');
+            const lstCollege = document.getElementById("lstCollege");
+            radios.forEach(radio => {
+                radio.addEventListener("change", function () {
+                    if (this.checked) {
+                        
+                        const label = document.querySelector(`label[for="${this.id}"]`);
+                        setEIValues({
+                            lbl_breadcrumb: { value: label.textContent , mode: "text" }
+                        });
+                    }
+                    
+                    document.querySelectorAll('#block-college-dep, #block-grade-choice, #block-ge, #block-ta, #block-other')
+                        .forEach(el => el.classList.add('d-none'));
+                    ClearWeekly();
+                    document.getElementById('cardContainer').innerHTML = ''; 
+                    switch (this.value) {
+                        case "opt1":
+                            kind = "2";
+                            lstCollege.selectedIndex = 0;
+                            getDept(lstCollege.value);
+                            getGrade();
+                            document.getElementById('block-college-dep').classList.remove('d-none');
+                            document.getElementById('block-grade-choice').classList.remove('d-none');
+                            break;
+                        case "opt2":
+                            kind = "3";
+                            lstCollege.selectedIndex = 0;                           
+                            getDept(lstCollege.value);
+                            getGrade();
+                            document.getElementById('block-college-dep').classList.remove('d-none');
+                            document.getElementById('block-grade-choice').classList.remove('d-none');
+                            break;
+                        case "opt3":
+                            kind = "4";
+                            document.getElementById('block-ge').classList.remove('d-none');
+                            break;
+                        case "opt4":
+                            kind = "5";
+                            document.getElementById('block-ta').classList.remove('d-none');
+                            break;
+                        case "opt5":
+                            kind = "6";
+                            document.getElementById('block-other').classList.remove('d-none');
+                            break;
+                    }
+                });
+            });
+        });
+        
+        const getCollege = () => loadOptions('/Course/api/Query/GetCollege', { l: savedLang }, "lstCollege");
+        const getDept = col_id => loadOptions('/Course/api/Query/GetDept', { t: kind, f: col_id, l: savedLang }, "lstDept");
+        const getGrade = () => loadOptions('/Course/api/Query/GetGrade', { t: kind, l: savedLang }, "lstGrade");
+        const getGeArea = () => loadOptions('/Course/api/Query/GetGeArea', { l: savedLang }, "lstGeArea");
+        const getTaClass = () => loadOptions('/Course/api/Query/GetTaClass', { l: savedLang }, "lstTaClass");
+        
+        
+        async function getList(k) {   
+            if (k === "1") {
+                const kw = getEIValue("txtKeyWord");
+                setEIValues({
+                    lbl_breadcrumb: { value: "快速查詢：" + kw , mode: "text" }
+                });
+            }
+            const acs = getEIValue("lstAcadeSession");
+            const kw = getEIValue("txtKeyWord");
+            const dept = getEIValue("lstDept");
+            const grade = getEIValue("lstGrade");
+            const choice = getEIValue("lstChoice");
+            const other = getEIValue("lstOther");
+            const geArea = getEIValue("lstGeArea");
+            const taClass = getEIValue("lstTaClass");
+            const weekStr = Array.from(
+                document.querySelectorAll('input[name="cblWeekly"]:checked')
+            )
+                .map(cb => cb.value)
+                .join("");   
+
+            if (k === "1") {
+                if (kw.length < 2) {
+                    showAlert('訊息視窗', "關鍵字請至少輸入 2 個字！", "warning", "txtKeyWord");
+                    return false;
+                }
+                kind = k;
+            }             
+            try {                              
+                showLoading("查詢中...");     
+                await new Promise(r => setTimeout(r, 0));
+                document.getElementById('cardContainer').innerHTML = '';
+                const dataArray = await doPost('/Course/api/Query/GetCourse', { acs: acs, kw: kw, dc: dept, gr: grade, ch: choice, ot: other, ge: geArea, ta: taClass, we: weekStr, ki: kind ,ll:savedLang});
+                if (!dataArray) return;
+                dataArray.forEach((item, index) => {
+                    const cardId = `card_${index + 1}`;
+                    const collapseId = `collapseDetails_${index + 1}`;
+                    const toggleId = `toggleText_${index + 1}`;
+                    const str = `
+                                <div class="col-12 col-md-6">
+                                    <div class="card h-100 rounded-0 shadow-sm transition position-relative card-container" id="${cardId}">
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title mb-2">
+                                                ${Choice(item.Choice, "ZZ")} 
+                                                <span class="fw-bolder" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="課程名稱" data-i18n-title="ZZ15">${item.CourName}</span><br />
+                                                <small class="text-muted fs-6" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="課程英文名稱">${item.CourEngName}</small>
+                                            </h5>
+                                            <p class="card-text mb-2">
+                                                <span class="fw-bold text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="開課班級" data-i18n-title="ZZ03">${item.ClassName1}</span>
+                                                <span class="text-soft-muted">| </span>
+                                                
+                                                ${getTea(item.TeaEmail, item.TeaNo1, item.AlPt, item.TeaName1)}                                                
+                                                <span class="text-soft-muted">| </span>
+                                                <span class="fw-bold text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="學分數" data-i18n-title="ZZ13">${item.Credit} <span data-i18n="ZZ13">學分</span></span>
+                                                <br />
+                                                
+                                                ${WeekSection(item.Week, item.Section, "","ZZ14")}
+                                                <span class="text-soft-muted">| </span>
+                                                ${Room(item.Room, item.ComptRoom)}                                              
+                                                <span class="text-soft-muted">| </span>
+                                                
+                                                ${Badges(item.EMI, item.Dist, item.Coord)}
+                                                
+                                                ${Remark(item.Remark)}
+                                            </p>
+                                            <div class="row justify-content-between align-items-center">  
+                                                <div class="col-auto">
+                                                ${getSyllabusUrl(item.sYear, item.Sec, item.SelCourNo, item.TeaNo1, item.Method)}  
+                                                </div>
+                                                <div class="col-auto">
+                                                    <span class="text-muted toggle-text"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target="#${collapseId}"
+                                                        role="button"
+                                                        aria-expanded="false"
+                                                        aria-controls="${collapseId}"
+                                                        id="${toggleId}"
+                                                        style="cursor: pointer;" title="展開">
+                                                        <i class="bi bi-caret-down-fill"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="collapse" id="${collapseId}" data-bs-parent="#accordionGroup">
+                                            <div class="border-top pt-2 ms-4" style="font-size: 0.9em;">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <ul class="list-unstyled mb-0">
+                                                            <li><strong><span data-i18n="ZZ01">選課代碼</span>：</strong><span class="text-primary">${item.SelCourNo}</span></li>
+                                                            <li><strong><span data-i18n="ZZ02">課程代碼</span>：</strong><span class="text-primary">${item.CourNo}</span></li>
+                                                            <li><strong><span data-i18n="ZZ03">開課班級</span>：</strong><span class="text-primary">${item.ClassName1}</span></li>
+                                                            <li><strong><span data-i18n="ZZ04">人數上限</span>：</strong><span class="text-primary">${item.MaxSel}</span></li>
+                                                            <li><strong><span data-i18n="ZZ10">已選人數</span>：</strong><span class="text-primary">${item.NowSel}</span></li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <ul class="list-unstyled mb-0">
+                                                            <li><strong><span data-i18n="ZZ06">學分/時數</span>：</strong><span class="text-primary">${item.Credit}/${item.TotHour}</span></li>
+                                                            <li><strong><span data-i18n="ZZ07">上課時間</span>：</strong><span class="text-primary">${WeekSection(item.Week, item.Section)}</span></li>
+                                                            <li><strong><span data-i18n="ZZ08">上課教室</span>：</strong><span class="text-primary">${Room(item.Room, item.ComptRoom)}</span></li>
+                                                            <li><strong><span data-i18n="ZZ05">人數下限</span>：</strong><span class="text-primary">${item.MinSel}</span></li>
+                                                            <li>
+                                                                <strong><span data-i18n="ZZ52">教科書</span>：</strong>
+                                                                <span class="text-primary">
+                                                                ${item.BookLang === "0"
+                                                                    ? (savedLang === "en" ? "Chinese" : "中文")
+                                                                    : (savedLang === "en" ? "English" : "英文")}
+                                                                </span>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <ul class="list-unstyled mb-1">
+                                                    <li><strong><span data-i18n="ZZ11">教師</span>：</strong><span class="text-primary">${item.TeaName ?? ""}</span></li>
+                                                </ul>
+                                            </div>
+                                            <span class="btn toggle-btn"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#${collapseId}"
+                                                aria-expanded="false"
+                                                aria-controls="${collapseId}" title="合起">
+                                                <i class="bi bi-caret-up-fill"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                    document.getElementById('cardContainer').insertAdjacentHTML('beforeend', str);
+                    initCardCollapse();
+
+                    
+                    if (window.innerWidth <= 768) {
+                        const btn = document.getElementById('btnQuery');
+                        if (btn) {
+                            btn.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }                    
+                });               
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                showAlert('訊息視窗', "連線失敗!(03)", "error");
+            } finally {
+                hideLoading();            
+            }
+            
+            const lang = localStorage.getItem("lang") || "zh-TW";
+            setLanguage(lang);
+
+            
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        function getTea(email, teano, apl, teaname) {
+            let tea = "";
+            let url = "";
+
+            if (teano && teano.trim() !== "") {  
+                if (apl === "1") { 
+                    if (email && email.trim() !== "") {
+                        url = `https://gaweb.nutn.edu.tw/faculty/teaData.aspx?id=${email.split("@")[0]}`;
+                    }
+                } else { 
+                    url = `/Course/Qry/TeaInfo?id=${teano}&ap=${apl}`;
+                }
+                tea = `<span class="fw-bold " data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" title="授課教師" data-i18n-title="ZZ11"><a href="${url}" target="_blank">${teaname}</a></span>`;
+            } else { tea = '<span class="text-muted fw-bold" data-i18n="ZZ53">無教師</span>' }
+
+            return tea;
+        }
+
+        
+        function ClearWeekly() {                     
+            document.querySelectorAll('input[name="cblWeekly"]').forEach(cb => {
+                cb.checked = false;
+            });                
+        }
+
+        
+        function initCardCollapse() {
+            document.querySelectorAll('.collapse').forEach(collapseEl => {
+                
+                if (collapseEl.dataset.listenerAttached) return;
+                collapseEl.dataset.listenerAttached = "true";
+
+                collapseEl.addEventListener('show.bs.collapse', function () {
+                    const card = collapseEl.closest('.card-container');
+                    if (card) card.classList.add('expanded');
+                });
+
+                collapseEl.addEventListener('hide.bs.collapse', function () {
+                    const card = collapseEl.closest('.card-container');
+                    if (card) card.classList.remove('expanded');
+                });
+            });
+        }
+    </script> 
+    <script src='/Course/Scripts/sel.js?v=639027305503569729'></script>
+        
+</body>
+</html>
