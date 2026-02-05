@@ -68,7 +68,7 @@ export function renderCoursesToSchoolPage(courses: Course[]) {
 
     const str = `
         <div class="col-12 col-md-6 mb-3">
-            <div class="card h-100 rounded-0 shadow-sm border-0" style="border-left: 5px solid #ffc107 !important;" id="${cardId}">
+            <div class="card h-100 rounded-0 shadow-sm border-0 js-nutn-helper-bound" style="border-left: 5px solid #ffc107 !important;" id="${cardId}">
                 <div class="card-body d-flex flex-column pt-3 pb-3">
                     <h5 class="card-title mb-2" style="font-size: 1.1rem; font-weight: bold;">
                         ${localChoice(item.Choice)} 
@@ -136,6 +136,9 @@ export function renderCoursesToSchoolPage(courses: Course[]) {
   const btns = cardContainer.querySelectorAll(".my-collapse-btn");
   btns.forEach((btn) => {
     btn.addEventListener("click", function (e) {
+      // 阻止冒泡，避免觸發卡片的點擊事件 (避免點摺疊卻開了詳情視窗)
+      e.stopPropagation();
+
       const targetId = (e.currentTarget as HTMLElement).getAttribute("data-target");
       if (targetId) {
         const content = document.getElementById(targetId);
@@ -151,6 +154,43 @@ export function renderCoursesToSchoolPage(courses: Course[]) {
           }
         }
       }
+    });
+  });
+
+  // 5. 綁定卡片點擊事件 (用來開啟右側詳情視窗)
+  const cards = cardContainer.querySelectorAll(".card");
+  console.log(`準備綁定 ${cards.length} 張卡片的點擊事件`);
+
+  cards.forEach((card, index) => {
+    card.addEventListener("click", function (e) {
+      console.log(`卡片 ${index} 被點擊了`);
+      const course = courses[index];
+      
+      // 從網頁上的下拉選單抓取目前的學年與學期
+      const sessionSelect = document.getElementById("lstAcadeSession") as HTMLSelectElement;
+      let syear = "114"; // 預設值
+      let term = "2";   // 預設值
+      
+      if (sessionSelect && sessionSelect.value) {
+         const val = sessionSelect.value;
+         if (val.length >= 2) {
+            term = val.slice(-1);
+            syear = val.slice(0, val.length - 1);
+         }
+      }
+
+      console.log("發送事件內容:", { syear, term, cour_no: course.SelCourNo });
+
+      // 觸發自定義事件，把課程資料傳給 React 元件
+      const event = new CustomEvent("NUTN_COURSE_CLICK", {
+        detail: {
+            year: syear,
+            term: term,
+            cour_no: course.SelCourNo,
+            teacher: course.TeaName1
+        }
+      });
+      window.dispatchEvent(event);
     });
   });
 

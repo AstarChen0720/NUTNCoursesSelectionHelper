@@ -90,10 +90,10 @@ I留空就可以
    2. 寫好過濾邏輯並綁定
    4. 如何將自己的資料顯示出來?
       1. 因為瀏覽器不能調用他裡面的工具函數,就算知道是哪個在接收也會無法運行,所以現在直接自己模仿他寫html後注入來顯示
-4. 點選課程顯示課程大綱和decard老師名稱搜尋結果的功能<---現在在這
+4. 點選課程顯示課程大綱和decard老師名稱搜尋結果的功能
    1. 顯示課程大綱,網址https://academics.nutn.edu.tw/Course/preview_detail.aspx?syear=114&term=2&cour_no="SelCourNo"(課程編號) 
-   2. 顯示decard老師名稱搜尋結果
-5. 基本UI美化
+   2. 顯示decard老師名稱搜尋結果(直接跳轉到decard網頁因為他鎖iframe內嵌)
+5. 基本UI美化<---現在在這
 
 
 

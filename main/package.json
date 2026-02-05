@@ -1,8 +1,8 @@
 {
-  "name": "台南大學選課助手-0.0.4",
+  "name": "台南大學選課助手NUTNCSH-0.1.0",
   "description": "manifest.json description",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",
