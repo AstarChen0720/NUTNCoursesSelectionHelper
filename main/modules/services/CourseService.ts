@@ -1,6 +1,5 @@
 //抓取課程資料的工具函式
 
-
 import { Course, Dept } from "../types";
 import {
   API_URLS,
@@ -96,7 +95,7 @@ export class CourseService {
             token,
           );
 
-          return (response && response.length > 0) ? response : [];
+          return response && response.length > 0 ? response : [];
         } catch (e) {
           console.error(`查詢失敗: ${dept.name}`, e);
           return [];

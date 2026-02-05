@@ -1,13 +1,11 @@
 // 節數查詢按鈕面板: 用戶可以選擇自己想上的節數, 然後篩選出符合條件的課程
 // 並將結果渲染到學校課程頁面
 
-
-
 import { useState } from "react";
 //課程爬蟲工具
 import { useCourseCrawler } from "../modules/hooks/useCourseCrawler";
 //從我的參數表中拿出每節課的常數
-import { PERIODS } from "../modules/constants";
+import { PERIODS, DAYS } from "../modules/constants";
 //DOM渲染工具
 import { renderCoursesToSchoolPage } from "../modules/utils/domRenderer";
 
@@ -18,6 +16,8 @@ export function PeriodQueryPanel() {
   const [isOpen, setIsOpen] = useState(false);
   //儲存用戶選擇的節數
   const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
+  //儲存用戶選擇的星期
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   //處理點選選項的動作:如果已選中，則取消選擇；如果未選中，則添加選擇
   const togglePeriod = (val: string) => {
@@ -28,10 +28,19 @@ export function PeriodQueryPanel() {
     }
   };
 
+  //處理點選星期的動作
+  const toggleDay = (val: string) => {
+    if (selectedDays.includes(val)) {
+      setSelectedDays(selectedDays.filter((d) => d !== val));
+    } else {
+      setSelectedDays([...selectedDays, val]);
+    }
+  };
+
   //處理篩選按鈕的點擊事件:如果有選擇節數，則執行篩選；如果沒有選擇，則提示用戶選擇
   const handleSearch = async () => {
-    if (selectedPeriods.length === 0) {
-      alert("請至少選擇一個節數！\n例如：想找空堂在第6、7節的課");
+    if (selectedPeriods.length === 0 && selectedDays.length === 0) {
+      alert("請至少選擇一個篩選條件（節數或星期）！");
       return;
     }
 
@@ -45,16 +54,38 @@ export function PeriodQueryPanel() {
       }
     }
 
-    //篩選有選擇節數的課程(有任何一節符合即可)
+    //進行綜合篩選
     const results = sourceData.filter((course) => {
-      const courseSection = course.Section;
-      if (!courseSection) return false;
-      return selectedPeriods.some((p) => courseSection.includes(p));
+      // 1. 篩選節數 (如果用戶有選節數才檢查)
+      let periodMatch = true;
+      if (selectedPeriods.length > 0) {
+        const courseSection = course.Section;
+        if (!courseSection) {
+          periodMatch = false;
+        } else {
+          periodMatch = selectedPeriods.some((p) => courseSection.includes(p));
+        }
+      }
+
+      // 2. 篩選星期 (如果用戶有選星期才檢查)
+      let dayMatch = true;
+      if (selectedDays.length > 0) {
+        const courseWeek = course.Week;
+        if (!courseWeek) {
+          dayMatch = false;
+        } else {
+          // 注意：API 返回的 Week 欄位是一串字串，如 "23" 代表星期二和星期三
+          // 只要課程的星期包含使用者選的【任一】星期，就算符合
+          dayMatch = selectedDays.some((d) => courseWeek.includes(d));
+        }
+      }
+
+      return periodMatch && dayMatch;
     });
-    
+
     //除錯用: 印出篩選結果
     console.log(
-      `========== 篩選條件: [${selectedPeriods.join(", ")}] ==========`,
+      `========== 篩選條件: 節數[${selectedPeriods.join(", ")}], 星期[${selectedDays.join(", ")}] ==========`,
     );
     console.log(`總資料筆數: ${sourceData.length}`);
     console.log(`符合筆數: ${results.length}`);
@@ -88,9 +119,41 @@ export function PeriodQueryPanel() {
       {isOpen && (
         <div className="card w-100 mt-2 shadow-sm border-warning">
           <div className="card-header bg-warning bg-opacity-10 fw-bold text-dark">
-            選擇空堂節數 (複選)
+            篩選條件 (複選，可組合)
           </div>
           <div className="card-body p-2">
+            {/* 星期選擇區 */}
+            <h6 className="small text-muted fw-bold mb-1">選擇星期</h6>
+            <div className="d-flex flex-wrap gap-2 justify-content-center mb-3">
+              {DAYS.map((d) => (
+                <label
+                  key={d.val}
+                  style={{
+                    cursor: "pointer",
+                    border: "1px solid #ced4da",
+                    padding: "3px 8px", // 稍微小一點
+                    borderRadius: "5px",
+                    backgroundColor: selectedDays.includes(d.val)
+                      ? "#198754" // 綠色
+                      : "white",
+                    color: selectedDays.includes(d.val) ? "white" : "black",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    value={d.val}
+                    checked={selectedDays.includes(d.val)}
+                    onChange={() => toggleDay(d.val)}
+                    style={{ display: "none" }}
+                  />
+                  <span>{d.text}</span>
+                </label>
+              ))}
+            </div>
+
+            {/* 節數選擇區 */}
+            <h6 className="small text-muted fw-bold mb-1">選擇節數</h6>
             <div className="d-flex flex-wrap gap-2 justify-content-center">
               {PERIODS.map((p) => (
                 <label
@@ -148,7 +211,10 @@ export function PeriodQueryPanel() {
             <div className="d-flex justify-content-between">
               <button
                 className="btn btn-sm btn-outline-secondary"
-                onClick={() => setSelectedPeriods([])}
+                onClick={() => {
+                  setSelectedPeriods([]);
+                  setSelectedDays([]);
+                }}
               >
                 清空
               </button>

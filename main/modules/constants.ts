@@ -46,3 +46,13 @@ export const PERIODS: { val: string; text: string }[] = [
   { val: "E", text: "E(20:00~20:50)" },
   { val: "F", text: "F(21:00~21:50)" },
 ];
+
+export const DAYS: { val: string; text: string }[] = [
+  { val: "1", text: "一" },
+  { val: "2", text: "二" },
+  { val: "3", text: "三" },
+  { val: "4", text: "四" },
+  { val: "5", text: "五" },
+  { val: "6", text: "六" },
+  { val: "7", text: "日" },
+];

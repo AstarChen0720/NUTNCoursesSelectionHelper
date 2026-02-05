@@ -48,7 +48,7 @@ export function useCourseCrawler() {
       const mainCourses = await CourseService.fetchMainCourses(
         token,
         deptList,
-        setProgress
+        setProgress,
       );
       finalBigArray = finalBigArray.concat(mainCourses);
 
