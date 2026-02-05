@@ -1,6 +1,6 @@
 # 🎓 NUTN 選課小幫手 (NUTN Courses Selection Helper)
 
-[chrome extension頁面](等他過這裡要放chrome extension的連結)
+[chrome extension頁面](https://chromewebstore.google.com/detail/bahdnlhcihplhnhakjgcolhfngmmgmia?authuser=0&hl=zh-TW)
 
 嘿大家！歡迎來到我的**網頁程式寒假練習專案**
 每次選課差剛好有某些節數要補但他不能查詢節數要一頁一頁點開來看實在太麻煩了，所以寫一個小幫手幫我篩出那些有空的課程!並且決定做成一個瀏覽器擴充功能讓大家也可以方便地使用。
